@@ -1,19 +1,50 @@
-use std::ops::{Add, Div, Mul, Sub};
+use std::fmt;
+use std::ops::{Add, Div, Mul, Neg, Sub};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Quaternion([f64; 4]);
+
+// impl fmt::Display for Quaternion {
+//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+//         let [w, x, y, z] = self.0;
+//         write!(f, "{}{:+}i{:+}j{:+}k", w, x, y, z)
+//     }
+// }
+
+impl fmt::Display for Quaternion {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // Threshold for zeroing small values
+        const EPS: f64 = 1e-13;
+
+        // Round and clean up small values
+        fn clean(x: f64) -> f64 {
+            if x.abs() < EPS {
+                0.0
+            } else {
+                (x * 10_000.0).round() / 10_000.0
+            }
+        }
+
+        let w = clean(self.0[0]);
+        let x = clean(self.0[1]);
+        let y = clean(self.0[2]);
+        let z = clean(self.0[3]);
+
+        write!(f, "{} {:+}i {:+}j {:+}k", w, x, y, z)
+    }
+}
 
 impl Quaternion {
     pub fn new(w: f64, x: f64, y: f64, z: f64) -> Self {
         Quaternion([w, x, y, z])
     }
 
-    fn magnitude_sq(&self) -> f64 {
-        self.0.iter().map(|&e| e.powi(2)).sum::<f64>()
+    pub fn dot(&self) -> f64 {
+        self.0.iter().map(|&e| e * e).sum::<f64>()
     }
 
     pub fn magnitude(&self) -> f64 {
-        self.magnitude_sq().sqrt()
+        self.dot().sqrt()
     }
 
     pub fn conjugate(&self) -> Self {
@@ -21,7 +52,7 @@ impl Quaternion {
     }
 
     pub fn inverse(&self) -> Self {
-        let ms = self.magnitude_sq();
+        let ms = self.dot();
         let mut conj = self.conjugate();
         conj.0.iter_mut().for_each(|e| *e /= ms);
         conj
@@ -80,6 +111,28 @@ impl Div for Quaternion {
 
     fn div(self, other: Self) -> Self {
         self * other.inverse()
+    }
+}
+
+impl Neg for Quaternion {
+    type Output = Self;
+
+    fn neg(self) -> Self::Output {
+        Quaternion([-self.0[0], -self.0[1], -self.0[2], -self.0[3]])
+    }
+}
+
+impl Mul<f64> for Quaternion {
+    type Output = Self;
+    fn mul(self, rhs: f64) -> Self {
+        Quaternion(self.0.map(|e| e * rhs))
+    }
+}
+
+impl Div<f64> for Quaternion {
+    type Output = Self;
+    fn div(self, rhs: f64) -> Self {
+        Quaternion(self.0.map(|e| e / rhs))
     }
 }
 
