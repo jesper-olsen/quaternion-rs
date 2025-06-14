@@ -1,47 +1,30 @@
 use std::ops::{Add, Div, Mul, Sub};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Quaternion {
-    pub w: f64, // scalar part
-    pub x: f64, // i component
-    pub y: f64, // j component
-    pub z: f64, // k component
-}
+pub struct Quaternion([f64; 4]);
 
 impl Quaternion {
     pub fn new(w: f64, x: f64, y: f64, z: f64) -> Self {
-        Quaternion { w, x, y, z }
+        Quaternion([w, x, y, z])
+    }
+
+    fn magnitude_sq(&self) -> f64 {
+        self.0.iter().map(|&e| e.powi(2)).sum::<f64>()
     }
 
     pub fn magnitude(&self) -> f64 {
-        (self.w.powi(2) + self.x.powi(2) + self.y.powi(2) + self.z.powi(2)).sqrt()
-    }
-
-    pub fn normalise(&mut self) {
-        self.w = 1.0;
-        self.x /= self.w;
-        self.y /= self.w;
-        self.z /= self.w;
+        self.magnitude_sq().sqrt()
     }
 
     pub fn conjugate(&self) -> Self {
-        Quaternion {
-            w: self.w,
-            x: -self.x,
-            y: -self.y,
-            z: -self.z,
-        }
+        Quaternion([self.0[0], -self.0[1], -self.0[2], -self.0[3]])
     }
 
     pub fn inverse(&self) -> Self {
-        let mag_squared = self.w.powi(2) + self.x.powi(2) + self.y.powi(2) + self.z.powi(2);
-        let conj = self.conjugate();
-        Quaternion {
-            w: conj.w / mag_squared,
-            x: conj.x / mag_squared,
-            y: conj.y / mag_squared,
-            z: conj.z / mag_squared,
-        }
+        let ms = self.magnitude_sq();
+        let mut conj = self.conjugate();
+        conj.0.iter_mut().for_each(|e| *e /= ms);
+        conj
     }
 }
 
@@ -49,12 +32,12 @@ impl Add for Quaternion {
     type Output = Self;
 
     fn add(self, other: Self) -> Self {
-        Quaternion {
-            w: self.w + other.w,
-            x: self.x + other.x,
-            y: self.y + other.y,
-            z: self.z + other.z,
-        }
+        Quaternion([
+            self.0[0] + other.0[0],
+            self.0[1] + other.0[1],
+            self.0[2] + other.0[2],
+            self.0[3] + other.0[3],
+        ])
     }
 }
 
@@ -62,12 +45,12 @@ impl Sub for Quaternion {
     type Output = Self;
 
     fn sub(self, other: Self) -> Self {
-        Quaternion {
-            w: self.w - other.w,
-            x: self.x - other.x,
-            y: self.y - other.y,
-            z: self.z - other.z,
-        }
+        Quaternion([
+            self.0[0] - other.0[0],
+            self.0[1] - other.0[1],
+            self.0[2] - other.0[2],
+            self.0[3] - other.0[3],
+        ])
     }
 }
 
@@ -76,12 +59,19 @@ impl Mul for Quaternion {
 
     // Hamilton product
     fn mul(self, other: Self) -> Self {
-        Quaternion {
-            w: self.w * other.w - self.x * other.x - self.y * other.y - self.z * other.z,
-            x: self.w * other.x + self.x * other.w + self.y * other.z - self.z * other.y,
-            y: self.w * other.y - self.x * other.z + self.y * other.w + self.z * other.x,
-            z: self.w * other.z + self.x * other.y - self.y * other.x + self.z * other.w,
-        }
+        Quaternion([
+            self.0[0] * other.0[0]
+                - self.0[1] * other.0[1]
+                - self.0[2] * other.0[2]
+                - self.0[3] * other.0[3],
+            self.0[0] * other.0[1] + self.0[1] * other.0[0] + self.0[2] * other.0[3]
+                - self.0[3] * other.0[2],
+            self.0[0] * other.0[2] - self.0[1] * other.0[3]
+                + self.0[2] * other.0[0]
+                + self.0[3] * other.0[1],
+            self.0[0] * other.0[3] + self.0[1] * other.0[2] - self.0[2] * other.0[1]
+                + self.0[3] * other.0[0],
+        ])
     }
 }
 
