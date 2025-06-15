@@ -15,7 +15,7 @@ References
 
 [5] [Quaternions - UC Davis](https://youtu.be/mHVwd8gYLnI)
 
-[6] "Hypercomplex Numbers An Elementary Introduction to Algebras" by I.L. Kantor A.S. Solodovnikov
+[6] "Hypercomplex Numbers - An Elementary Introduction to Algebras" by I.L. Kantor A.S. Solodovnikov
 
 
 Run
