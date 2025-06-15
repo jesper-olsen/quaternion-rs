@@ -43,6 +43,13 @@ impl Quaternion {
         self.0.iter().map(|&e| e * e).sum::<f64>()
     }
 
+    pub fn eq(&self, other: &Quaternion, eps: f64) -> bool {
+        self.0
+            .iter()
+            .zip(other.0.iter())
+            .all(|(a, b)| (a - b).abs() < eps)
+    }
+
     pub fn magnitude(&self) -> f64 {
         self.dot().sqrt()
     }
@@ -139,10 +146,21 @@ impl Div<f64> for Quaternion {
 #[cfg(test)]
 mod tests {
     use super::*;
+    const EPS: f64 = 1e-13;
 
     #[test]
-    fn it_works() {
+    fn test_conjugate() {
         let q = Quaternion::new(1.0, 2.0, 3.0, 4.0);
-        assert!(q.conjugate() == Quaternion::new(1.0, -2.0, -3.0, -4.0));
+        let qc = Quaternion::new(1.0, -2.0, -3.0, -4.0);
+        assert!(q.conjugate().eq(&qc, EPS));
+    }
+
+    #[test]
+    fn test_inverse() {
+        let q = Quaternion::new(1.0, 2.0, 3.0, 4.0);
+        let qi = q.inverse();
+        let c = q * qi;
+        let r = Quaternion::new(1.0, 0.0, 0.0, 0.0);
+        assert!(c.eq(&r, EPS));
     }
 }

@@ -1,6 +1,6 @@
 ## Quaternion
 
-Numeric Quaternion type - 4D hyper complex numbers [1,2,3,4].
+Numeric Quaternion type - 4D hyper complex numbers [1-5].
 
 References
 ----------
