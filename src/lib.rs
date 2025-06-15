@@ -1,3 +1,4 @@
+use num_traits::{One, Zero};
 use std::fmt;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
@@ -14,11 +15,10 @@ pub struct Quaternion([f64; 4]);
 impl fmt::Display for Quaternion {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // Threshold for zeroing small values
-        const EPS: f64 = 1e-13;
 
         // Round and clean up small values
         fn clean(x: f64) -> f64 {
-            if x.abs() < EPS {
+            if x.abs() < Quaternion::EPS {
                 0.0
             } else {
                 (x * 10_000.0).round() / 10_000.0
@@ -35,6 +35,7 @@ impl fmt::Display for Quaternion {
 }
 
 impl Quaternion {
+    const EPS: f64 = 1e-13;
     pub fn new(w: f64, x: f64, y: f64, z: f64) -> Self {
         Quaternion([w, x, y, z])
     }
@@ -60,9 +61,23 @@ impl Quaternion {
 
     pub fn inverse(&self) -> Self {
         let ms = self.dot();
-        let mut conj = self.conjugate();
-        conj.0.iter_mut().for_each(|e| *e /= ms);
-        conj
+        self.conjugate() / ms
+    }
+}
+
+impl Zero for Quaternion {
+    fn zero() -> Self {
+        Quaternion([0.0; 4])
+    }
+
+    fn is_zero(&self) -> bool {
+        self.0.iter().all(|&x| x.abs() < Self::EPS)
+    }
+}
+
+impl One for Quaternion {
+    fn one() -> Self {
+        Quaternion([1.0, 0.0, 0.0, 0.0])
     }
 }
 
@@ -146,13 +161,12 @@ impl Div<f64> for Quaternion {
 #[cfg(test)]
 mod tests {
     use super::*;
-    const EPS: f64 = 1e-13;
 
     #[test]
     fn test_conjugate() {
         let q = Quaternion::new(1.0, 2.0, 3.0, 4.0);
         let qc = Quaternion::new(1.0, -2.0, -3.0, -4.0);
-        assert!(q.conjugate().eq(&qc, EPS));
+        assert!(q.conjugate().eq(&qc, Quaternion::EPS));
     }
 
     #[test]
@@ -161,6 +175,6 @@ mod tests {
         let qi = q.inverse();
         let c = q * qi;
         let r = Quaternion::new(1.0, 0.0, 0.0, 0.0);
-        assert!(c.eq(&r, EPS));
+        assert!(c.eq(&r, Quaternion::EPS));
     }
 }
