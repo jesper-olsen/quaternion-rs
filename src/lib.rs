@@ -177,4 +177,13 @@ mod tests {
         let r = Quaternion::new(1.0, 0.0, 0.0, 0.0);
         assert!(c.eq(&r, Quaternion::EPS));
     }
+
+    #[test]
+    fn test_abs_of_product() {
+        let q1 = Quaternion::new(3.06, 1.0, 1.0, 2.0);
+        let q2 = Quaternion::new(0.70, 3.0, -1.0, 2.0);
+        let p1 = (q1 * q2).dot();
+        let p2 = q1.dot() * q2.dot();
+        assert!((p1 - p2).abs() < Quaternion::EPS);
+    }
 }
