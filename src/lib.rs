@@ -36,7 +36,7 @@ impl fmt::Display for Quaternion {
 
 impl Quaternion {
     const EPS: f64 = 1e-13;
-    pub fn new(w: f64, x: f64, y: f64, z: f64) -> Self {
+    pub const fn new(w: f64, x: f64, y: f64, z: f64) -> Self {
         Quaternion([w, x, y, z])
     }
 
