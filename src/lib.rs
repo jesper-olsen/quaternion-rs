@@ -206,4 +206,12 @@ mod tests {
         let p2 = q1.norm_sq() * q2.norm_sq();
         assert!((p1 - p2).abs() < Quaternion::EPS);
     }
+
+    #[test]
+    fn test_add() {
+        let mut q = Quaternion::new(1.0, 2.0, 3.0, 4.0);
+        q += q;
+        let r = Quaternion::new(2.0, 4.0, 6.0, 8.0);
+        assert!(q.eq(&r, Quaternion::EPS));
+    }
 }
