@@ -44,7 +44,15 @@ impl Quaternion {
         Quaternion([0.0; 4])
     }
 
-    pub fn dot(&self) -> f64 {
+    pub fn dot(&self, other: &Self) -> f64 {
+        self.0
+            .iter()
+            .zip(other.0.iter())
+            .map(|(a, b)| a * b)
+            .sum::<f64>()
+    }
+
+    pub fn norm_sq(&self) -> f64 {
         self.0.iter().map(|&e| e * e).sum::<f64>()
     }
 
@@ -56,7 +64,7 @@ impl Quaternion {
     }
 
     pub fn magnitude(&self) -> f64 {
-        self.dot().sqrt()
+        self.norm_sq().sqrt()
     }
 
     pub fn conjugate(&self) -> Self {
@@ -64,7 +72,7 @@ impl Quaternion {
     }
 
     pub fn inverse(&self) -> Self {
-        let ms = self.dot();
+        let ms = self.norm_sq();
         self.conjugate() / ms
     }
 }
@@ -186,8 +194,8 @@ mod tests {
     fn test_abs_of_product() {
         let q1 = Quaternion::new(3.06, 1.0, 1.0, 2.0);
         let q2 = Quaternion::new(0.70, 3.0, -1.0, 2.0);
-        let p1 = (q1 * q2).dot();
-        let p2 = q1.dot() * q2.dot();
+        let p1 = (q1 * q2).norm_sq();
+        let p2 = q1.norm_sq() * q2.norm_sq();
         assert!((p1 - p2).abs() < Quaternion::EPS);
     }
 }
