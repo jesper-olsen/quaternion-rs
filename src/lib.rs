@@ -1,6 +1,6 @@
 use num_traits::{One, Zero};
 use std::fmt;
-use std::ops::{Add, Div, Mul, Neg, Sub};
+use std::ops::{Add, AddAssign, Div, Mul, Neg, Sub};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Quaternion([f64; 4]);
@@ -103,6 +103,14 @@ impl Add for Quaternion {
             self.0[2] + other.0[2],
             self.0[3] + other.0[3],
         ])
+    }
+}
+
+impl AddAssign for Quaternion {
+    fn add_assign(&mut self, other: Self) {
+        for i in 0..4 {
+            self.0[i] += other.0[i];
+        }
     }
 }
 
