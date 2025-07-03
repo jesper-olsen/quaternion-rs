@@ -40,6 +40,10 @@ impl Quaternion {
         Quaternion([w, x, y, z])
     }
 
+    pub const fn zero() -> Self {
+        Quaternion([0.0; 4])
+    }
+
     pub fn dot(&self) -> f64 {
         self.0.iter().map(|&e| e * e).sum::<f64>()
     }
